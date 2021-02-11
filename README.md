@@ -49,7 +49,7 @@ az webapp deployment source config --name $webappname --resource-group $resource
 echo http://$webappname.azurewebsites.net
 ```
 
-### Python and ACR
+### Web Services and ACR
 ```bash
 workshopapp=workshopapp$RANDOM
 
