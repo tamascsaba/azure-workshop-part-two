@@ -56,6 +56,7 @@ workshopapp=workshopapp$RANDOM
 az acr update -n $registry --admin-enabled true
 az acr credential show --resource-group $resource --name $registry
 
+# Docker magic
 docker login $registry.azurecr.io --username <registry-username>
 docker build -t hello-workshop .
 docker tag hello-workshop $registry.azurecr.io/hello-workshop:latest
@@ -64,6 +65,7 @@ docker run -it -p 8080:8000 $registry.azurecr.io/hello-workshop
 
 az acr repository list -n $registry
 
+# Create webapp
 az appservice plan create --name hello-workshop --resource-group $resource --is-linux
 az webapp create --resource-group $resource --plan hello-workshop --name $workshopapp --deployment-container-image-name $registry.azurecr.io/hello-workshop:latest
 
@@ -71,13 +73,19 @@ az webapp config appsettings set --resource-group $resource --name $workshopapp 
 az webapp identity assign --resource-group $resource --name $workshopapp --query principalId --output tsv
 az account show --query id --output tsv
 
+# Add roles
 az role assignment create --assignee <principal-id> --scope /subscriptions/<subscription-id>/resourceGroups/$resource/providers/Microsoft.ContainerRegistry/registries/$registry --role "AcrPull"
 
+# Setup container
 az webapp config container set --name $workshopapp --resource-group $resource --docker-custom-image-name $registry.azurecr.io/appsvc-tutorial-custom-image:latest --docker-registry-server-url https://$registry.azurecr.io
 
 az webapp restart --name $workshopapp --resource-group $resource
 
 echo http://$workshopapp.azurewebsites.net
+
+# Life saver commands
+az webapp log config --name $workshopapp --resource-group $resource --docker-container-logging filesystem
+az webapp log tail --name $workshopapp --resource-group $resource
 
 ```
 Based on: https://docs.microsoft.com/hu-hu/azure/app-service/tutorial-custom-container?pivots=container-linux
