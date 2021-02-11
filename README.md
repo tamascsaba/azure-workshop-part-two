@@ -6,20 +6,22 @@ Services, Deployment, CI
 ### Create a private container registry 
 
 ```bash
+resource=workshop
+registry=workshop$RANDOM
 az login
-az group create --name workshopTwo --location westeurope
-az acr create --resource-group workshopTwo --name workshopRegistry --sku Basic
-az acr login --name workshopRegistry
+az group create --name $resource --location westeurope
+az acr create --resource-group $resource --name $registry --sku Basic
+az acr login --name $registry
 
 git clone https://github.com/tamascsaba/hello-workshop.git
-az acr build -t hello-workshop -r workshopRegistry .
-az acr repository list --name workshopRegistry --output table
+az acr build -t hello-workshop -r $registry .
+az acr repository list --name $registry --output table
 
 #Push images with docker
-az acr update -n workshopRegistry --admin-enabled true
+az acr update -n $registry --admin-enabled true
 docker pull mcr.microsoft.com/hello-world
 docker tag mcr.microsoft.com/hello-world workshopRegistry.azurecr.io/hello-world:v1
-docker push workshopRegistry.azurecr.io/hello-world:v1
+docker push $registry.azurecr.io/hello-world:v1
      
 ```
 
@@ -32,22 +34,22 @@ gitrepo=https://github.com/Azure-Samples/php-docs-hello-world
 webappname=mywebapp$RANDOM
 
 # Create a resource group.
-az group create --location westeurope --name myResourceGroup
+az group create --location westeurope --name $resource
 
 # Create an App Service plan
-az appservice plan create --name $webappname --resource-group myResourceGroup --sku FREE
+az appservice plan create --name $webappname --resource-group $resource --sku FREE
 
 # Create a web app.
-az webapp create --name $webappname --resource-group myResourceGroup --plan $webappname
+az webapp create --name $webappname --resource-group $resource --plan $webappname
 
 # Deploy sample code
-az webapp deployment source config --name $webappname --resource-group myResourceGroup --repo-url $gitrepo --branch master --manual-integration
+az webapp deployment source config --name $webappname --resource-group $resource --repo-url $gitrepo --branch master --manual-integration
 
 # Copy the result
 echo http://$webappname.azurewebsites.net
 ```
 
-## Python and ACR
+### Python and ACR
 ```bash
 git clone https://github.com/Azure-Samples/docker-django-webapp-linux.git
 cd docker-django-webapp-linux
